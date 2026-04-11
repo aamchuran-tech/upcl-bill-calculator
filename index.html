@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPCL Approximate Bill Calculator</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #1e293b;
+            --success: #22c55e;
+            --bg: #f1f5f9;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: #334155;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 30px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            font-size: 26px;
+            margin-bottom: 35px;
+        }
+
+        /* Settings Toggle */
+        .settings-toggle {
+            text-align: right;
+            margin-bottom: 15px;
+        }
+
+        #settingsBtn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        #tariffSettings {
+            display: none;
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px dashed #cbd5e1;
+            margin-bottom: 25px;
+        }
+
+        .section-label {
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #94a3b8;
+            margin: 30px 0 15px 0;
+            display: block;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 5px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-bottom: 5px;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        input,
+        select {
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+            background: white;
+            transition: border-color 0.2s;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: var(--primary);
+        }
+
+        /* Animation Classes */
+        @keyframes resultPop {
+            0% {
+                transform: scale(0.98);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .animate-pop {
+            animation: resultPop 0.4s ease-out forwards;
+        }
+
+        .btn-calculate {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 18px;
+            font-size: 18px;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            margin: 25px 0;
+            transition: transform 0.1s, background 0.2s;
+        }
+
+        .btn-calculate:active {
+            transform: scale(0.98);
+        }
+
+        .btn-calculate:hover {
+            background: #1d4ed8;
+        }
+
+        .summary-stats {
+            display: flex;
+            justify-content: space-around;
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .stat-val {
+            display: block;
+            font-weight: 800;
+            color: var(--primary);
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .stat-lbl {
+            font-size: 11px;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+
+        .view-panel {
+            background: var(--secondary);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            opacity: 1;
+        }
+
+        .view-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 15px;
+            color: #cbd5e1;
+        }
+
+        .view-row.highlight {
+            color: #fbbf24;
+            font-weight: 600;
+        }
+
+        .grand-total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #334155;
+        }
+
+        .total-amount {
+            color: var(--success);
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .disclaimer-box {
+            margin-top: 50px;
+            padding: 20px;
+            background: #fdf2f2;
+            border: 1px solid #fee2e2;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #7f1d1d;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>UPCL Approximate Bill Calculator</h1>
+
+        <div class="settings-toggle">
+            <button id="settingsBtn" onclick="toggleSettings()">⚙️ Edit Tariff Rates (Advanced)</button>
+        </div>
+
+        <div id="tariffSettings">
+            <span class="section-label" style="margin-top:0">Tariff Configuration (₹)</span>
+            <div class="grid">
+                <div class="input-group"><label>Slab 1 (0-100)</label><input type="number" id="r1" value="3.65"
+                        oninput="calculateBill()"></div>
+                <div class="input-group"><label>Slab 2 (101-200)</label><input type="number" id="r2" value="5.25"
+                        oninput="calculateBill()"></div>
+                <div class="input-group"><label>Slab 3 (201-400)</label><input type="number" id="r3" value="7.15"
+                        oninput="calculateBill()"></div>
+                <div class="input-group"><label>Slab 4 (400+)</label><input type="number" id="r4" value="7.80"
+                        oninput="calculateBill()"></div>
+                <div class="input-group"><label>Solar Rebate/100L</label><input type="number" id="rSolar" value="150"
+                        oninput="calculateBill()"></div>
+                <div class="input-group"><label>Elec. Duty (Unit)</label><input type="number" id="rDuty" value="0.15"
+                        oninput="calculateBill()"></div>
+            </div>
+        </div>
+
+        <span class="section-label">Meter Readings & Period</span>
+        <div class="grid">
+            <div class="input-group"><label>Previous Reading</label><input type="number" id="a1" value="1000"
+                    oninput="calculateBill()"></div>
+            <div class="input-group"><label>Previous Date</label><input type="date" id="a2" value="2026-03-01"
+                    oninput="calculateBill()"></div>
+            <div class="input-group"><label>Current Reading</label><input type="number" id="a3" value="1111"
+                    oninput="calculateBill()"></div>
+            <div class="input-group"><label>Current Date</label><input type="date" id="a4" value="2026-03-27"
+                    oninput="calculateBill()"></div>
+        </div>
+
+        <span class="section-label">System Parameters</span>
+        <div class="grid">
+            <div class="input-group"><label>Sanctioned Load (kW)</label><input type="number" id="a5" value="2"
+                    step="0.1" oninput="calculateBill()"></div>
+            <div class="input-group">
+                <label>Solar Capacity (Liters)</label>
+                <select id="a7" onchange="calculateBill()">
+                    <option value="0">No Solar Heater (0L)</option>
+                    <option value="100">100 Liters</option>
+                    <option value="200">200 Liters</option>
+                    <option value="300" selected>300 Liters</option>
+                    <option value="400">400 Liters</option>
+                    <option value="500">500 Liters</option>
+                    <option value="800">800 Liters</option>
+                </select>
+            </div>
+        </div>
+
+        <span class="section-label">Adjustments</span>
+        <div class="grid">
+            <div class="input-group"><label>Other Charges (+)</label><input type="number" id="a8" value="69.24"
+                    oninput="calculateBill()"></div>
+            <div class="input-group"><label>Other Rebate (-)</label><input type="number" id="a9" value="0.00"
+                    oninput="calculateBill()"></div>
+        </div>
+
+        <button class="btn-calculate" onclick="triggerRefresh()">REFRESH CALCULATION</button>
+
+        <div id="resultArea">
+            <div class="summary-stats">
+                <div><span class="stat-lbl">Units</span><span id="b1" class="stat-val">0</span></div>
+                <div><span class="stat-lbl">Days</span><span id="b2" class="stat-val">0</span></div>
+                <div><span class="stat-lbl">Solar Rebate</span><span id="b3" class="stat-val">₹0.00</span></div>
+            </div>
+
+            <div class="view-panel">
+                <div class="view-row"><span>Energy Charges</span><span id="vEnergy">₹0.00</span></div>
+                <div class="view-row"><span>Fixed Charges (Load)</span><span id="vFixed">₹0.00</span></div>
+                <div class="view-row"><span>Electricity Duty</span><span id="vDuty">₹0.00</span></div>
+                <div class="view-row highlight" id="vSolarRow"><span>Solar Rebate (-)</span><span
+                        id="vSolarMinus">₹0.00</span></div>
+                <div class="grand-total-row">
+                    <div>
+                        <div style="font-size: 14px; color: #94a3b8;">Estimated Total</div>
+                        <div id="statusLabel" style="font-size: 11px; color: #64748b;">(Dynamic Calculation)</div>
+                    </div>
+                    <div id="vTotal" class="total-amount">₹0.00</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="disclaimer-box">
+            <h3>Legal Disclaimer</h3>
+            <p><strong>1. Estimation Only:</strong> Results are approximations based on user-defined rates.</p>
+            <p><strong>2. Data Privacy:</strong> All calculations happen locally; no data is stored.</p>
+            <p><strong>2. Copyright</strong> </p>©All Rights Reserved!
+        </div>
+    </div>
+    </div>
+
+    <script>
+        function toggleSettings() {
+            const s = document.getElementById('tariffSettings');
+            s.style.display = (s.style.display === 'block') ? 'none' : 'block';
+        }
+
+        function triggerRefresh() {
+            const area = document.getElementById('resultArea');
+            area.classList.remove('animate-pop');
+            void area.offsetWidth; // Trigger reflow
+            area.classList.add('animate-pop');
+            calculateBill();
+        }
+
+        function calculateBill() {
+            const a1 = parseFloat(document.getElementById('a1').value) || 0;
+            const a3 = parseFloat(document.getElementById('a3').value) || 0;
+            const a5 = parseFloat(document.getElementById('a5').value) || 0;
+            const a7 = parseFloat(document.getElementById('a7').value) || 0;
+            const a8 = parseFloat(document.getElementById('a8').value) || 0;
+            const a9 = parseFloat(document.getElementById('a9').value) || 0;
+
+            const r1 = parseFloat(document.getElementById('r1').value) || 0;
+            const r2 = parseFloat(document.getElementById('r2').value) || 0;
+            const r3 = parseFloat(document.getElementById('r3').value) || 0;
+            const r4 = parseFloat(document.getElementById('r4').value) || 0;
+            const rSolarRate = parseFloat(document.getElementById('rSolar').value) || 0;
+            const rDutyRate = parseFloat(document.getElementById('rDuty').value) || 0;
+
+            const dStart = new Date(document.getElementById('a2').value);
+            const dEnd = new Date(document.getElementById('a4').value);
+            const days = Math.max(0, Math.ceil((dEnd - dStart) / (1000 * 60 * 60 * 24)));
+            const units = a3 - a1;
+
+            if (units < 0 || isNaN(days) || days === 0) {
+                document.getElementById('vTotal').innerText = "₹0.00";
+                document.getElementById('statusLabel').innerText = "Enter valid reading (Curr > Prev)";
+                return;
+            }
+
+            document.getElementById('statusLabel').innerText = "(Dynamic Calculation)";
+            const ratio = days / 30.4166;
+            const L = 100 * ratio;
+
+            let energy = 0;
+            if (units <= L) energy = units * r1;
+            else if (units <= (2 * L)) energy = (L * r1) + (units - L) * r2;
+            else if (units <= (4 * L)) energy = (L * r1) + (L * r2) + (units - 2 * L) * r3;
+            else energy = (L * r1) + (L * r2) + (2 * L * r3) + (units - 4 * L) * r4;
+
+            const fixed = (a5 < 1) ? a5 * 75 : (a5 < 4) ? a5 * 85 : a5 * 100;
+            const duty = units * rDutyRate;
+            const solarRebate = ((a7 / 100) * rSolarRate) * ratio;
+
+            document.getElementById('b1').innerText = units;
+            document.getElementById('b2').innerText = days;
+            document.getElementById('b3').innerText = "₹" + solarRebate.toFixed(2);
+            document.getElementById('vEnergy').innerText = "₹" + energy.toFixed(2);
+            document.getElementById('vFixed').innerText = "₹" + fixed.toFixed(2);
+            document.getElementById('vDuty').innerText = "₹" + duty.toFixed(2);
+            document.getElementById('vSolarMinus').innerText = "₹" + solarRebate.toFixed(2);
+            document.getElementById('vSolarRow').style.visibility = (a7 === 0) ? 'hidden' : 'visible';
+
+            const total = energy + fixed + duty + a8 - a9 - solarRebate;
+            document.getElementById('vTotal').innerText = "₹" + Math.max(0, total).toFixed(2);
+        }
+
+        // Animate also on simple input changes
+        document.querySelectorAll('input, select').forEach(item => {
+            item.addEventListener('input', () => {
+                const area = document.getElementById('resultArea');
+                area.classList.remove('animate-pop');
+                void area.offsetWidth;
+                area.classList.add('animate-pop');
+            });
+        });
+
+        window.onload = calculateBill;
+    </script>
+</body>
+
+</html>
