@@ -406,7 +406,7 @@ function calculateBill() {
     else if (load < 4) fixedPerMonth = load * 85;
     else fixedPerMonth = load * 100;
 
-    const fixed = fixedPerMonth * ratio;
+    const fixed = fixedPerMonth;
 
     // ===== DUTY =====
     const duty = units * rDutyRate;
