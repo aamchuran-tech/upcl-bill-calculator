@@ -218,6 +218,51 @@
             color: #7f1d1d;
             line-height: 1.6;
         }
+
+        /* ===== MOBILE FIX ===== */
+        @media (max-width: 600px) {
+
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+                /* stack vertically */
+            }
+
+            /* Keep important pairs visually grouped */
+            .grid .input-group {
+                margin-bottom: 10px;
+            }
+
+            /* Smaller fonts inside result panel */
+            .view-panel {
+                padding: 20px;
+            }
+
+            .view-row {
+                font-size: 13px;
+            }
+
+            .total-amount {
+                font-size: 22px;
+            }
+
+            .stat-val {
+                font-size: 16px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .btn-calculate {
+                padding: 14px;
+                font-size: 16px;
+            }
+        }
     </style>
 </head>
 
@@ -320,132 +365,133 @@
 
         <div style="text-align: center; margin-top: 20px;">
             <a href="https://www.freecounterstat.com" title="website counter">
-            <img src="https://counter10.optistats.ovh/private/freecounterstat.php?c=8l8z6r3p1x8u9y4l8q7w8n2m9k5j4h3g" border="0" title="website counter" alt="website counter">
+                <img src="https://counter10.optistats.ovh/private/freecounterstat.php?c=8l8z6r3p1x8u9y4l8q7w8n2m9k5j4h3g"
+                    border="0" title="website counter" alt="website counter">
             </a>
             <p style="font-size: 10px; color: #94a3b8;">Aamchuran Tech Traffic Monitor</p>
-    </div>
+        </div>
 
     </div>
     </div>
 
-<script>
-function toggleSettings() {
-    const s = document.getElementById('tariffSettings');
-    s.style.display = (s.style.display === 'block') ? 'none' : 'block';
-}
+    <script>
+        function toggleSettings() {
+            const s = document.getElementById('tariffSettings');
+            s.style.display = (s.style.display === 'block') ? 'none' : 'block';
+        }
 
-function triggerRefresh() {
-    const area = document.getElementById('resultArea');
-    area.classList.remove('animate-pop');
-    void area.offsetWidth;
-    area.classList.add('animate-pop');
-    calculateBill();
-}
+        function triggerRefresh() {
+            const area = document.getElementById('resultArea');
+            area.classList.remove('animate-pop');
+            void area.offsetWidth;
+            area.classList.add('animate-pop');
+            calculateBill();
+        }
 
-function calculateBill() {
+        function calculateBill() {
 
-    // ===== INPUTS =====
-    const prev = parseFloat(document.getElementById('a1').value) || 0;
-    const curr = parseFloat(document.getElementById('a3').value) || 0;
-    const load = parseFloat(document.getElementById('a5').value) || 0;
-    const solar = parseFloat(document.getElementById('a7').value) || 0;
-    const otherAdd = parseFloat(document.getElementById('a8').value) || 0;
-    const otherLess = parseFloat(document.getElementById('a9').value) || 0;
+            // ===== INPUTS =====
+            const prev = parseFloat(document.getElementById('a1').value) || 0;
+            const curr = parseFloat(document.getElementById('a3').value) || 0;
+            const load = parseFloat(document.getElementById('a5').value) || 0;
+            const solar = parseFloat(document.getElementById('a7').value) || 0;
+            const otherAdd = parseFloat(document.getElementById('a8').value) || 0;
+            const otherLess = parseFloat(document.getElementById('a9').value) || 0;
 
-    const r1 = parseFloat(document.getElementById('r1').value) || 0;
-    const r2 = parseFloat(document.getElementById('r2').value) || 0;
-    const r3 = parseFloat(document.getElementById('r3').value) || 0;
-    const r4 = parseFloat(document.getElementById('r4').value) || 0;
-    const rSolarRate = parseFloat(document.getElementById('rSolar').value) || 0;
-    const rDutyRate = parseFloat(document.getElementById('rDuty').value) || 0;
+            const r1 = parseFloat(document.getElementById('r1').value) || 0;
+            const r2 = parseFloat(document.getElementById('r2').value) || 0;
+            const r3 = parseFloat(document.getElementById('r3').value) || 0;
+            const r4 = parseFloat(document.getElementById('r4').value) || 0;
+            const rSolarRate = parseFloat(document.getElementById('rSolar').value) || 0;
+            const rDutyRate = parseFloat(document.getElementById('rDuty').value) || 0;
 
-    const dStart = new Date(document.getElementById('a2').value);
-    const dEnd = new Date(document.getElementById('a4').value);
+            const dStart = new Date(document.getElementById('a2').value);
+            const dEnd = new Date(document.getElementById('a4').value);
 
-    // ===== BASIC CALC =====
-    let days = Math.ceil((dEnd - dStart) / (1000 * 60 * 60 * 24));
-    days = Math.max(1, days);
+            // ===== BASIC CALC =====
+            let days = Math.ceil((dEnd - dStart) / (1000 * 60 * 60 * 24));
+            days = Math.max(1, days);
 
-    const units = Math.max(0, curr - prev);
+            const units = Math.max(0, curr - prev);
 
-    if (curr <= prev) {
-        document.getElementById('vTotal').innerText = "₹0.00";
-        document.getElementById('statusLabel').innerText = "Enter valid reading (Curr > Prev)";
-        return;
-    }
+            if (curr <= prev) {
+                document.getElementById('vTotal').innerText = "₹0.00";
+                document.getElementById('statusLabel').innerText = "Enter valid reading (Curr > Prev)";
+                return;
+            }
 
-    const ratio = days / 30.4166; // avg month
+            const ratio = days / 30.4166; // avg month
 
-    // ===== PRO-RATA SLABS =====
-    const slab1 = 100 * ratio;
-    const slab2 = 100 * ratio;
-    const slab3 = 200 * ratio;
+            // ===== PRO-RATA SLABS =====
+            const slab1 = 100 * ratio;
+            const slab2 = 100 * ratio;
+            const slab3 = 200 * ratio;
 
-    // ===== ENERGY CALC (CLEAN LOOP) =====
-    let remaining = units;
-    let energy = 0;
+            // ===== ENERGY CALC (CLEAN LOOP) =====
+            let remaining = units;
+            let energy = 0;
 
-    const slabs = [
-        { limit: slab1, rate: r1 },
-        { limit: slab2, rate: r2 },
-        { limit: slab3, rate: r3 },
-        { limit: Infinity, rate: r4 }
-    ];
+            const slabs = [
+                { limit: slab1, rate: r1 },
+                { limit: slab2, rate: r2 },
+                { limit: slab3, rate: r3 },
+                { limit: Infinity, rate: r4 }
+            ];
 
-    for (let s of slabs) {
-        let used = Math.min(remaining, s.limit);
-        energy += used * s.rate;
-        remaining -= used;
-        if (remaining <= 0) break;
-    }
+            for (let s of slabs) {
+                let used = Math.min(remaining, s.limit);
+                energy += used * s.rate;
+                remaining -= used;
+                if (remaining <= 0) break;
+            }
 
-    // ===== FIXED CHARGE (PRO-RATA FIXED) =====
-    let fixedPerMonth = 0;
+            // ===== FIXED CHARGE (PRO-RATA FIXED) =====
+            let fixedPerMonth = 0;
 
-    if (load < 1) fixedPerMonth = load * 75;
-    else if (load < 4) fixedPerMonth = load * 85;
-    else fixedPerMonth = load * 100;
+            if (load < 1) fixedPerMonth = load * 75;
+            else if (load < 4) fixedPerMonth = load * 85;
+            else fixedPerMonth = load * 100;
 
-    const fixed = fixedPerMonth;
+            const fixed = fixedPerMonth;
 
-    // ===== DUTY =====
-    const duty = units * rDutyRate;
+            // ===== DUTY =====
+            const duty = units * rDutyRate;
 
-    // ===== SOLAR REBATE =====
-    const solarRebate = ((solar / 100) * rSolarRate) * ratio;
+            // ===== SOLAR REBATE =====
+            const solarRebate = ((solar / 100) * rSolarRate) * ratio;
 
-    // ===== TOTAL =====
-    const total = energy + fixed + duty + otherAdd - otherLess - solarRebate;
+            // ===== TOTAL =====
+            const total = energy + fixed + duty + otherAdd - otherLess - solarRebate;
 
-    // ===== UI UPDATE =====
-    document.getElementById('b1').innerText = units.toFixed(0);
-    document.getElementById('b2').innerText = days;
-    document.getElementById('b3').innerText = "₹" + solarRebate.toFixed(2);
+            // ===== UI UPDATE =====
+            document.getElementById('b1').innerText = units.toFixed(0);
+            document.getElementById('b2').innerText = days;
+            document.getElementById('b3').innerText = "₹" + solarRebate.toFixed(2);
 
-    document.getElementById('vEnergy').innerText = "₹" + energy.toFixed(2);
-    document.getElementById('vFixed').innerText = "₹" + fixed.toFixed(2);
-    document.getElementById('vDuty').innerText = "₹" + duty.toFixed(2);
-    document.getElementById('vSolarMinus').innerText = "₹" + solarRebate.toFixed(2);
+            document.getElementById('vEnergy').innerText = "₹" + energy.toFixed(2);
+            document.getElementById('vFixed').innerText = "₹" + fixed.toFixed(2);
+            document.getElementById('vDuty').innerText = "₹" + duty.toFixed(2);
+            document.getElementById('vSolarMinus').innerText = "₹" + solarRebate.toFixed(2);
 
-    document.getElementById('vSolarRow').style.visibility = (solar === 0) ? 'hidden' : 'visible';
+            document.getElementById('vSolarRow').style.visibility = (solar === 0) ? 'hidden' : 'visible';
 
-    document.getElementById('vTotal').innerText = "₹" + Math.max(0, total).toFixed(2);
-    document.getElementById('statusLabel').innerText = "(Improved Calculation)";
-}
+            document.getElementById('vTotal').innerText = "₹" + Math.max(0, total).toFixed(2);
+            document.getElementById('statusLabel').innerText = "(Improved Calculation)";
+        }
 
-// animation on input
-document.querySelectorAll('input, select').forEach(item => {
-    item.addEventListener('input', () => {
-        const area = document.getElementById('resultArea');
-        area.classList.remove('animate-pop');
-        void area.offsetWidth;
-        area.classList.add('animate-pop');
-        calculateBill();
-    });
-});
+        // animation on input
+        document.querySelectorAll('input, select').forEach(item => {
+            item.addEventListener('input', () => {
+                const area = document.getElementById('resultArea');
+                area.classList.remove('animate-pop');
+                void area.offsetWidth;
+                area.classList.add('animate-pop');
+                calculateBill();
+            });
+        });
 
-window.onload = calculateBill;
-</script>
+        window.onload = calculateBill;
+    </script>
 </body>
 
 </html>
